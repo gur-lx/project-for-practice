@@ -1,29 +1,20 @@
-# Backend Dockerfile (Node.js/Express)
-FROM node:18-alpine
+# Use official Node.js LTS image
+FROM node:18
 
-# Create app directory
+# Set working directory inside the container
 WORKDIR /usr/src/app
 
-# Copy package files
+# Copy package.json and package-lock.json for better caching
 COPY package*.json ./
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nodejs -u 1001
+# Install backend dependencies (including express)
+RUN npm install
 
-# Copy source code
+# Copy the rest of your backend source code
 COPY . .
 
-# Change ownership to nodejs user
-RUN chown -R nodejs:nodejs /usr/src/app
-USER nodejs
-
-# Expose port
+# Expose the port your app listens on (should match your app code and docker-compose)
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3000/health || exit 1
-
-# Start the application
-CMD ["npm", "start"]
+# Start your backend server
+CMD ["node", "server.js"]
